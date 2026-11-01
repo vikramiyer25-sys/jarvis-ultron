@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b14">
+<meta name="description" content="JARVIS and ULTRON mobile command centre">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>JARVIS // ULTRON</title>
+<style>
+:root{color-scheme:dark;--bg:#070b14;--panel:#101a2b;--line:#233752;--blue:#36b8ff;--red:#ff4567;--muted:#9eb0c8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0%,#102d4b 0,transparent 34%),radial-gradient(circle at 100% 18%,#3b1028 0,transparent 28%),var(--bg);color:#eef6ff;font:15px/1.5 system-ui,sans-serif}
+main{max-width:760px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center}.logo{font-weight:900;letter-spacing:.13em}.logo span{color:var(--blue)}.online{font-size:11px;color:#a4edc3;border:1px solid #285b49;border-radius:30px;padding:5px 9px}
+h1{font-size:clamp(30px,8vw,48px);line-height:1.04;margin:35px 0 8px}.muted{color:var(--muted)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0}.mode,.panel{background:linear-gradient(145deg,#111e31,#0b1220);border:1px solid var(--line);border-radius:17px;padding:15px}.mode{min-height:105px}.mode b{display:block;margin-bottom:5px}.mode small{color:var(--muted)}.blue{border-top:2px solid var(--blue)}.red{border-top:2px solid var(--red)}
+.panel{margin-top:13px}.panel h2{font-size:16px;margin:0 0 12px}.console{height:260px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:3px 0 10px}.bubble{max-width:91%;padding:10px 12px;border-radius:13px;background:#17263b;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.user{align-self:flex-end;background:#123b59}.bubble.bot{align-self:flex-start;border:1px solid #29415e}.who{font-size:10px;letter-spacing:.1em;color:#9eb6d1;margin-bottom:3px}
+form{display:flex;gap:8px}input{min-width:0;flex:1;background:#080f1c;color:white;border:1px solid #2a405d;border-radius:12px;padding:12px;font:inherit}button{border:0;border-radius:12px;padding:11px 14px;background:linear-gradient(100deg,#168fd4,#8b355c);color:white;font:inherit;font-weight:700}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.actions button,.links a{background:#121f32;border:1px solid #2a405d;color:#e6f4ff;text-decoration:none;border-radius:10px;padding:9px 11px;font-size:13px}
+.links{display:flex;gap:8px;flex-wrap:wrap}.hint{font-size:12px;color:var(--muted);margin-top:10px}.notice{font-size:12px;color:#ffcf9c;margin-top:8px}
+@media(max-width:380px){.modes{grid-template-columns:1fr}.console{height:220px}}
+</style>
+</head>
+<body><main>
+<header><div class="logo"><span>JARVIS</span> // ULTRON</div><div class="online">● MOBILE CORE</div></header>
+<h1>Your command.<br><span style="color:var(--blue)">Your control.</span></h1>
+<div class="muted">A mobile command centre, built around you.</div>
+<section class="modes">
+<div class="mode blue"><b>🔵 JARVIS</b><small>Personal assistant · voice · everyday commands</small></div>
+<div class="mode red"><b>🔴 ULTRON</b><small>AI coordination · comparison · task routing</small></div>
+</section>
+<section class="panel">
+<h2>Command console</h2>
+<div class="console" id="log"><div class="bubble bot"><div class="who">JARVIS SYSTEM</div>Mobile interface ready. This build is in local demo mode.</div></div>
+<form id="form"><input id="msg" placeholder="Give me a command..." maxlength="2000" autocomplete="off" required><button>Send</button></form>
+<div class="actions"><button type="button" id="mic">🎙 Voice input</button><button type="button" id="speak">🔊 Read last reply</button></div>
+<div class="hint">Demo mode: no external AI is connected yet. Voice input depends on browser support and permission.</div>
+<div class="notice" id="notice"></div>
+</section>
+<section class="panel"><h2>AI launchpad</h2><div class="links">
+<a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT ↗</a><a href="https://claude.ai" target="_blank" rel="noopener">Claude ↗</a><a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini ↗</a><a href="https://grok.com" target="_blank" rel="noopener">Grok ↗</a><a href="https://www.perplexity.ai" target="_blank" rel="noopener">Perplexity ↗</a>
+</div></section>
+</main>
+<script>
+const log=document.querySelector('#log'),form=document.querySelector('#form'),msg=document.querySelector('#msg'),notice=document.querySelector('#notice');let lastReply='';
+function add(text,kind,label){const b=document.createElement('div');b.className='bubble '+kind;const w=document.createElement('div');w.className='who';w.textContent=label;const t=document.createElement('div');t.textContent=text;b.append(w,t);log.append(b);log.scrollTop=log.scrollHeight;}
+form.addEventListener('submit',e=>{e.preventDefault();const q=msg.value.trim();if(!q)return;add(q,'user','YOU');msg.value='';lastReply='JARVIS demo received your command: '+q+'. The mobile shell is working, but a real AI provider has not been connected.';add(lastReply,'bot','JARVIS · DEMO');});
+document.querySelector('#speak').addEventListener('click',()=>{if(!lastReply){notice.textContent='Send a message first.';return;}if(!('speechSynthesis'in window)){notice.textContent='Speech output is not supported in this browser.';return;}speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(lastReply));});
+document.querySelector('#mic').addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){notice.textContent='Voice input is not supported here. Try Chrome on Android.';return;}const r=new SR();r.lang=navigator.language||'en-IN';r.onresult=e=>{msg.value=e.results[0][0].transcript;msg.focus();};r.onerror=()=>notice.textContent='Microphone input stopped. Check browser permission and try again.';r.start();notice.textContent='Listening…';});
+if('serviceWorker'in navigator && location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+</body></html>
