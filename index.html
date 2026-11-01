@@ -45,7 +45,44 @@ form{display:flex;gap:8px}input{min-width:0;flex:1;background:#080f1c;color:whit
 <script>
 const log=document.querySelector('#log'),form=document.querySelector('#form'),msg=document.querySelector('#msg'),notice=document.querySelector('#notice');let lastReply='';
 function add(text,kind,label){const b=document.createElement('div');b.className='bubble '+kind;const w=document.createElement('div');w.className='who';w.textContent=label;const t=document.createElement('div');t.textContent=text;b.append(w,t);log.append(b);log.scrollTop=log.scrollHeight;}
-form.addEventListener('submit',e=>{e.preventDefault();const q=msg.value.trim();if(!q)return;add(q,'user','YOU');msg.value='';lastReply='JARVIS demo received your command: '+q+'. The mobile shell is working, but a real AI provider has not been connected.';add(lastReply,'bot','JARVIS · DEMO');});
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const q = msg.value.trim();
+  if (!q) return;
+
+  add(q, 'user', 'YOU');
+  msg.value = '';
+  notice.textContent = 'JARVIS is thinking...';
+
+  try {
+    const response = await fetch(
+      'https://jarvis-ultron-es6f.vercel.app/api/chat',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: q })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Request failed');
+    }
+
+    lastReply = data.reply;
+    add(lastReply, 'bot', 'JARVIS · GEMINI');
+    notice.textContent = 'Connected to Gemini.';
+  } catch (error) {
+    lastReply = '';
+    notice.textContent = 'Connection error: ' + error.message;
+  }
+});
+  
 document.querySelector('#speak').addEventListener('click',()=>{if(!lastReply){notice.textContent='Send a message first.';return;}if(!('speechSynthesis'in window)){notice.textContent='Speech output is not supported in this browser.';return;}speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(lastReply));});
 document.querySelector('#mic').addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){notice.textContent='Voice input is not supported here. Try Chrome on Android.';return;}const r=new SR();r.lang=navigator.language||'en-IN';r.onresult=e=>{msg.value=e.results[0][0].transcript;msg.focus();};r.onerror=()=>notice.textContent='Microphone input stopped. Check browser permission and try again.';r.start();notice.textContent='Listening…';});
 if('serviceWorker'in navigator && location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
